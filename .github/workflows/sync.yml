@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  sync:
+  sync-vlmcsd:
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -37,6 +37,54 @@ jobs:
           ref: ${{ matrix.BRANCH != 'master' && 'openwrt-' || '' }}${{ matrix.BRANCH }}
           fetch-depth: 1
 
+      - name: Confugure git
+        run: |
+          git config --global user.name 'GitHub Actions'
+          git config --global user.email 'noreply@github.com'
+
+      - name: Prepare branch
+        run: |
+          cd workdir
+          git switch --orphan ${{ matrix.UPSTREAM }}-${{ matrix.BRANCH }}-vlmcsd
+          rm -rf ./*
+      
+      - name: Sync files
+        run: |
+          cd workdir
+          cp -r ../upstream-packages/net/vlmcsd ./
+
+      - name: Commit and push changes
+        run: |
+          cd workdir
+          git add .
+          git commit -m "Sync from ${{ matrix.UPSTREAM }}/packages:${{ matrix.BRANCH }}" || echo "No changes to commit"
+          git push origin ${{ matrix.UPSTREAM }}-${{ matrix.BRANCH }} --force
+
+  sync-luci-app-vlmcsd:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - UPSTREAM: 'immortalwrt'
+            BRANCH: '24.10'
+          - UPSTREAM: 'immortalwrt'
+            BRANCH: '25.12'
+          - UPSTREAM: 'immortalwrt'
+            BRANCH: 'master'
+
+          - UPSTREAM: 'coolsnowwolf'
+            BRANCH: 'master'
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v5
+        with:
+          path: workdir
+          fetch-depth: 0
+
       - name: Checkout upstream
         uses: actions/checkout@v5
         with:
@@ -53,13 +101,12 @@ jobs:
       - name: Prepare branch
         run: |
           cd workdir
-          git switch --orphan ${{ matrix.UPSTREAM }}-${{ matrix.BRANCH }} || git switch ${{ matrix.UPSTREAM }}-${{ matrix.BRANCH }}
+          git switch --orphan ${{ matrix.UPSTREAM }}-${{ matrix.BRANCH }}-luci-app-vlmcsd
           rm -rf ./*
       
       - name: Sync files
         run: |
           cd workdir
-          cp -r ../upstream-packages/net/vlmcsd ./
           cp -r ../upstream-luci/applications/luci-app-vlmcsd ./
 
       - name: Commit and push changes
