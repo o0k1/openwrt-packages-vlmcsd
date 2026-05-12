@@ -58,7 +58,7 @@ jobs:
           cd workdir
           git add .
           git commit -m "Sync from ${{ matrix.UPSTREAM }}/packages:${{ matrix.BRANCH }}" || echo "No changes to commit"
-          git push origin ${{ matrix.UPSTREAM }}-${{ matrix.BRANCH }} --force
+          git push origin ${{ matrix.UPSTREAM }}-${{ matrix.BRANCH }}-vlmcsd --force
 
   sync-luci-app-vlmcsd:
     runs-on: ubuntu-latest
@@ -114,4 +114,4 @@ jobs:
           cd workdir
           git add .
           git commit -m "Sync from ${{ matrix.UPSTREAM }}/packages:${{ matrix.BRANCH }}" || echo "No changes to commit"
-          git push origin ${{ matrix.UPSTREAM }}-${{ matrix.BRANCH }} --force
+          git push origin ${{ matrix.UPSTREAM }}-${{ matrix.BRANCH }}-luci-app-vlmcsd --force
